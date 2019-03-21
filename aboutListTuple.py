@@ -8,6 +8,9 @@ print("l3 = " + str(l3))
 print(random.choice(l3)) # l3からランダムに要素を取り出す
 print("l3.index(秋) = " + str(l3.index("秋")))
 
+random.shuffle(l3) # リストの要素をシャッフル
+print(l3)
+
 print("春 in l3 = ", end="")
 if "春" in l3:
     print("true")
