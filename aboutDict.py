@@ -45,3 +45,15 @@ else :
 dict["exp"] = ["123", "abc", "456", "def"]
 for elm in dict["exp"]:
     print(elm)
+
+# 辞書の内包表記
+enw = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+jaw = ["日", "月", "火", "水", "木", "金", "土"]
+weekdays = {e:j for e, j in zip(enw, jaw)}
+print("weekdays = " + str(weekdays))
+
+years1 = [1989, 2018, 1989, 1972, 2001, 1972, 2018]
+years2 = {str(y) + "年" for y in years1}
+print("years2 = " + str(years2)) # 重複する要素は削除される
+years3 = {str(y) + "年" for y in years1 if y >= 2000}
+print("years3 = " + str(years3))
