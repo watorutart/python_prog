@@ -1,6 +1,7 @@
 import turtle
 import random
 import math
+import time
 
 def backorigin():
     # 原点に戻る
@@ -58,6 +59,7 @@ def is_hit(target, turtle):
     return True if diff < 25 else False
 
 def make_shot(pos):
+    shot_color = random.choice(colors)
     # 弾の生成
     for y in range(num_of_targets):
         t = turtle.Turtle()
@@ -65,31 +67,37 @@ def make_shot(pos):
         t.penup()
         t.sety(250)
         t.setx(0)
-        t.color(random.choice(colors))
+        t.color(shot_color)
         t.shape("square")
         t.shapesize(1)
         t.st()
         t.speed(1)
-        t.goto(pos + y, 250)
+        t.goto(pos + y, 320)
         targets.append(t)
 
 def isexist():
     for t in targets:
-        if t.xcor() >= -350 and 350 >= t.xcor() and t.ycor() >= -350 and 350 >= t.ycor():
+        if t.xcor() >= -350 + count*2 and 350 >= t.xcor() and t.ycor() >= -350 and 350 >= t.ycor():
             return False
+        else :
+            t.ht()
     return True
 
 def attack_spread(i, t, angle):
     t.seth(angle + (i - 3) * 10)
-    t.forward(6)
+    t.forward(7)
     t.tilt(3)
 
 def game():
     global count
+    global pattern
 
     if isexist() :
         targets.clear()
-        count += 1
+        count += pattern
+        if count >= 18:
+            pattern = random.randint(1,5)
+            count = pattern + random.randint(0, 3)
     if len(targets) == 0:
         if count%2 == 0:
             make_shot(-100)
@@ -108,11 +116,16 @@ def game():
             screen.tracer(1)
             my_turtle.color("gray")
             # タートルを震わせる
-            for _ in range(10):
+            my_turtle.seth(90)
+            for _ in range(6):
                 my_turtle.right(15)
                 my_turtle.left(15)
+            screen.delay(2)
+            time.sleep(1.5)
             time_text.goto(-300, 0)
             time_text.write("ゲームオーバー", font=("helvetica", 60))
+            my_turtle.ht()
+            screen.update()
             return
     # 画面をアップデート
     screen.update()
@@ -163,6 +176,7 @@ time_text.goto(0, -300)
 screen.tracer(0)
 
 count = 1
+pattern = 1
 
 game()
 
