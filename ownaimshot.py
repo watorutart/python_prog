@@ -91,7 +91,7 @@ def attack_spread(i, t, angle):
     t.tilt(3)
 
 def deg_own_shot(t):
-    # 弾道を自機狙いに
+    # 弾と自機の角度を求める
     xt = t.xcor()
     yt = t.ycor()
     xown = my_turtle.xcor()
@@ -115,6 +115,11 @@ def deg_own_shot(t):
         return 180 + deg
 
 def attack_ownaim(i, t):
+    # 弾道を自機狙いに
+    if t.heading() == 180:
+        angle = deg_own_shot(t)
+        t.seth(angle)
+        print("ownshot angle = " + str(angle))
     t.forward(8 - i*0.5)
     t.tilt(3)
 
@@ -135,10 +140,6 @@ def game():
             make_shot(100)
     for i, t in enumerate(targets):
         if count%3 == 0:
-            if t.heading() == 180:
-                angle = deg_own_shot(t)
-                t.seth(angle)
-                print("ownshot angle = " + str(angle))
             attack_ownaim(i, t)
         else :
             attack_spread(i, t, 270)
