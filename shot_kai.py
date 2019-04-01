@@ -2,6 +2,7 @@ import turtle
 import random
 import math
 import time
+import datetime
 
 def backorigin():
     # 原点に戻る
@@ -173,6 +174,11 @@ def game():
         else :
             attack_spread(i, t, 270)
 
+        # 経過時間を計算する
+        now = datetime.datetime.now()
+        etime = now - stime
+        sec = etime.seconds + etime.microseconds /1000000
+
         # 衝突チェック
         if is_hit(t, my_turtle):
             # タートルがターゲットにぶつかったらゲームオーバー
@@ -190,10 +196,16 @@ def game():
             screen.delay(2)
             time.sleep(1.5)
             time_text.goto(-300, 0)
-            time_text.write("ゲームオーバー", font=("helvetica", 60))
+            time_text.write(f"ゲームオーバー", font=("helvetica", 60))
             my_turtle.ht()
             screen.update()
             return
+        elif sec%10 <= 0.1:
+            # scoreを追加
+            time_text.clear()
+            time_text.write(f"score: {int(sec)}",
+                            font=("helvetica", 24))
+
     # 画面をアップデート
     screen.update()
     screen.ontimer(game, 10)
@@ -237,7 +249,13 @@ time_text = turtle.Turtle()
 time_text.color("white")
 time_text.penup()
 time_text.hideturtle()
-time_text.goto(0, -300)
+time_text.goto(100, 250)
+
+# スタート時間
+stime = datetime.datetime.now()
+
+# 経過時間
+e_time = 0
 
 # トレーサーをオフ
 screen.tracer(0)
