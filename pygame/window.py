@@ -1,3 +1,5 @@
+# 参考 : https://qiita.com/_kenken82/items/f06a71636ad888af699d
+
 import sys
 import pygame
 from pygame.locals import *
