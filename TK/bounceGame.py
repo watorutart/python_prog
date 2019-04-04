@@ -46,8 +46,8 @@ class Paddle:
         self.canvas_width = self.canvas.winfo_width()
         self.canvas.bind_all('<KeyPress-Left>', self.turn_left)
         self.canvas.bind_all('<KeyPress-Right>', self.turn_right)
-        # self.wait = True
-        # self.canvas.bind_all('<Button-1>', self.game_start)
+        self.wait = True
+        self.canvas.bind_all('<Button-1>', self.game_start)
 
     def draw(self):
         self.canvas.move(self.id, self.x, 0)
@@ -56,6 +56,9 @@ class Paddle:
             self.x = 0
         elif pos[2] >= self.canvas_width:
             self.x = 0
+
+    def game_start(self, evt):
+        self.wait = False
 
     def turn_left(self, evt):
         self.x = -2
@@ -75,13 +78,26 @@ tk.update()
 
 paddle = Paddle(canvas, 'blue')
 ball = Ball(canvas, paddle, 'red')
+canvas.create_text(250, 250, text='左クリックでスタート！', font=('Courier', 30), tag="disp_start", fill="green")
+gameover = canvas.create_text(250, 100, text='Game Over...', font=('Courier', 30), fill="red", state="hidden")
 
 while True:
-    if ball.hit_bottom == False:
-        ball.draw()
-        paddle.draw()
+    if paddle.wait == False:
+        canvas.delete("disp_start")
+        if ball.hit_bottom == False:
+            ball.draw()
+            paddle.draw()
+        elif ball.hit_bottom == True:
+            print("game over")
+            canvas.itemconfig(gameover, state="normal")
+            tk.update_idletasks()
+            tk.update()
+            time.sleep(3)
+            break
     tk.update_idletasks()
     tk.update()
     time.sleep(0.01)
+
+
 
 # tk.mainloop()
