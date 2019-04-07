@@ -14,11 +14,16 @@ class Game:
         self.canvas_height=500
         self.cnavas_width=500
         self.bg = PhotoImage(file="C:/Users/watoru/Desktop/stickman/bg.gif") # cmd上ではbg.gifでいける
+        self.bg2 = PhotoImage(file="C:/Users/watoru/Desktop/stickman/haikei1.gif") # cmd上ではbg.gifでいける
+
         w = self.bg.width()
         h = self.bg.height()
         for x in range(0, 5):
             for y in range(0, 5):
-                self.canvas.create_image(x * w, y * h, image=self.bg, anchor='nw')
+                if (y+x)%2 == 0:
+                    self.canvas.create_image(x * w, y * h, image=self.bg, anchor='nw')
+                else :
+                    self.canvas.create_image(x * w, y * h, image=self.bg2, anchor='nw')
         self.sprites = []
         self.running = True
 
@@ -92,10 +97,76 @@ class PlatformSprite(Sprite):
         self.image = game.canvas.create_image(x, y, image=self.photo_image, anchor='nw')
         self.coordinates = Coords(x, y, x + width, y + height)
 
+class StickFigureSprite(Sprite):
+    def __init__(self, game):
+        Sprite.__init__(self, game)
+        self.images_left = [
+        PhotoImage(file="C:/Users/watoru/Desktop/stickman/figure-L1.gif"),
+        PhotoImage(file="C:/Users/watoru/Desktop/stickman/figure-L2.gif"),
+        PhotoImage(file="C:/Users/watoru/Desktop/stickman/figure-L3.gif")
+        ]
+        self.images_right = [
+        PhotoImage(file="C:/Users/watoru/Desktop/stickman/figure-R1.gif"),
+        PhotoImage(file="C:/Users/watoru/Desktop/stickman/figure-R2.gif"),
+        PhotoImage(file="C:/Users/watoru/Desktop/stickman/figure-R3.gif")
+        ]
+        self.image = game.canvas.create_image(200, 470, image=self.images_left[0], anchor='nw')
+        self.x = -2
+        self.y = 0
+        self.current_image = 0
+        self.current_image_add = 1
+        self.jump_count = 0
+        self.last_time = time.time()
+        self.coordinates = Coords()
+        game.canvas.bind_all('<KeyPress-Left>', self.turn_left)
+        game.canvas.bind_all('<KeyPress-Right', self.turn_right)
+        game.canvas.bind_all('<space>', self.jump)
+
+    def turn_left(self, evt):
+        if self.y == 0:
+            self.x = -2
+
+    def turn_right(self, evt):
+        if self.y == 0:
+            self.x = -2
+
+    def jump(self, evt):
+        if self.y == 0:
+            self.y = -4
+            self.jump_count = 0
 
 g = Game()
 
 platform1 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform1.gif"),
                             0, 480, 100, 10)
+platform2 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform1.gif"),
+                            150, 440, 100, 10)
+platform3 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform1.gif"),
+                            300, 400, 100, 10)
+platform4 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform1.gif"),
+                            300, 160, 100, 10)
+platform5 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform2.gif"),
+                            175, 350, 66, 10)
+platform6 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform2.gif"),
+                            50, 300, 66, 10)
+platform7 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform2.gif"),
+                            170, 120, 66, 10)
+platform8 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform2.gif"),
+                            45, 60, 66, 10)
+platform9 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform3.gif"),
+                            170, 250, 32, 10)
+platform10 = PlatformSprite(g, PhotoImage(file="C:/Users/watoru/Desktop/stickman/platform3.gif"),
+                            230, 200, 32, 10)
+
+g.sprites.append(platform1)
+g.sprites.append(platform2)
+g.sprites.append(platform3)
+g.sprites.append(platform4)
+g.sprites.append(platform5)
+g.sprites.append(platform6)
+g.sprites.append(platform7)
+g.sprites.append(platform8)
+g.sprites.append(platform9)
+g.sprites.append(platform10)
 
 g.mainloop()
