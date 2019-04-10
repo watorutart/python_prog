@@ -13,7 +13,7 @@ class Game:
         self.canvas.pack()
         self.tk.update()
         self.canvas_height=500
-        self.cnavas_width=500
+        self.canvas_width=500
         self.bg = PhotoImage(file="bg.gif") # cmd上ではbg.gifでいける
         self.bg2 = PhotoImage(file="haikei1.gif") # cmd上ではbg.gifでいける
 
@@ -27,12 +27,23 @@ class Game:
                     self.canvas.create_image(x * w, y * h, image=self.bg2, anchor='nw')
         self.sprites = []
         self.running = True
+        self.game_over_text = self.canvas.create_text(250, 50, \
+                text='YOU WIN!', state='hidden', font=('Helvetica', 22))
+        self.close_window = False
 
     def mainloop(self):
         while 1:
-            if self.running == True:
+            if self.running:
                 for sprite in self.sprites:
                     sprite.move()
+            elif self.close_window:
+                time.sleep(3)
+                break
+            else:
+                self.canvas.itemconfig(self.game_over_text, \
+                        state='normal')
+                self.close_window = True
+                time.sleep(1)
             self.tk.update_idletasks()
             self.tk.update()
             time.sleep(0.01)
@@ -169,81 +180,102 @@ class StickFigureSprite(Sprite):
                 self.game.canvas.itemconfig(self.image, \
                         image=self.images_right[self.current_image])
 
-        def coords(self):
-            xy = self.game.canvas.coords(self.image)
-            self.coordinates.x1 = xy[0]
-            self.coordinates.y1 = xy[1]
-            self.coordinates.x2 = xy[0] + 27
-            self.coordinates.y2 = xy[1] + 30
-            return self.coordinates
+    def coords(self):
+        xy = self.game.canvas.coords(self.image)
+        self.coordinates.x1 = xy[0]
+        self.coordinates.y1 = xy[1]
+        self.coordinates.x2 = xy[0] + 27
+        self.coordinates.y2 = xy[1] + 30
+        return self.coordinates
 
-        def move(self):
-            self.animate()
-            if self.y < 0:
-                self.jump_count += 1
-                if self.jump_count > 20:
-                    self.y = 4
-            if self.y > 0:
-                self.jump_count -= 1
-            co = self.coords()
-            left = True
-            right = True
-            top = True
-            bottom = True
-            falling = True
-            if self.y > 0 and co.y2 >= self.game.canvas_height:
-                self.y = 0
-                bottom = False
-            elif self.y < 0 and co.y1 <= 0:
-                self.y = 0
+    def move(self):
+        self.animate()
+        if self.y < 0:
+            self.jump_count += 1
+            if self.jump_count > 20:
+                self.y = 4
+        if self.y > 0:
+            self.jump_count -= 1
+        co = self.coords()
+        left = True
+        right = True
+        top = True
+        bottom = True
+        falling = True
+        if self.y > 0 and co.y2 >= self.game.canvas_height:
+            self.y = 0
+            bottom = False
+        elif self.y < 0 and co.y1 <= 0:
+            self.y = 0
+            top = False
+        if self.x > 0 and co.x2 >= self.game.canvas_width:
+            self.x = 0
+            right = False
+        elif self.x < 0 and co.x1 <= 0:
+            self.x = 0
+            left = False
+        for sprite in self.game.sprites:
+            if sprite == self:
+                continue
+            sprite_co = sprite.coords()
+            if top and self.y < 0 and collided_top(co, sprite_co):
+                self.y = -self.y
                 top = False
-            if self.x > 0 and co.x2 >= self.game.canvas_width:
-                self.x = 0
-                right = False
-            elif self.x < 0 and co.x1 <= 0:
+            if bottom and self.y > 0 and collided_bottom(self.y, \
+                    co, sprite_co):
+                self.y = sprite_co.y1 - co.y2
+                if self.y < 0:
+                    self.y = 0
+                bottom = False
+                top = False
+            if bottom and falling and self.y == 0 \
+                    and co.y2 < self.game.canvas_height \
+                    and collided_bottom(1, co, sprite_co):
+                falling = False
+            if left and self.x < 0 and collided_left(co, sprite_co):
                 self.x = 0
                 left = False
-            for sprite in self.game.sprites:
-                if sprite == self:
-                    continue
-                sprite_co = sprite.coords()
-                if top and self.y < 0 and collided_top(co, sprite_co):
-                    self.y = -self.y
-                    top = False
-                if bottom and self.y > 0 and collided_bottom(self.y, \
-                        co, sprite_co):
-                    self.y = sprite_co.y1 - co.y2
-                    if self.y < 0:
-                        self.y = 0
-                    bottom = False
-                    top = False
-                if bottom and falling and self.y == 0 \
-                        and co.y2 < self.game.canvas_height \
-                        and collided_bottom(1, co, sprite_co):
-                    falling = False
-                if left and self.x < 0 and collided_left(co, sprite_co):
-                    self.x = 0
-                    left = False
-                    if sprite.endgame:
-                        self.game.running = False
-                if right and self.x > 0 and collided_right(co, sprite_co):
-                    self.x = 0
-                    right = False
-                    if sprite.endgame:
-                        self.game.running = False
-            if falling and bottom and self.y == 0 \
-                    and co.y2 < self.game.canvas_height:
-                self.y = 4
-            self.game.canvas.move(self.image, self.x, self.y)
+                if sprite.endgame:
+                    self.game.running = False
+                    self.end(sprite)
+            if right and self.x > 0 and collided_right(co, sprite_co):
+                self.x = 0
+                right = False
+                if sprite.endgame:
+                    self.game.running = False
+                    self.end(sprite)
+        if falling and bottom and self.y == 0 \
+                and co.y2 < self.game.canvas_height:
+            self.y = 4
+        self.game.canvas.move(self.image, self.x, self.y)
+
+    def end(self, sprite):
+        self.game.running = False
+        sprite.opendoor()
+        time.sleep(1)
+        self.game.canvas.itemconfig(self.image, state='hidden')
+        sprite.closedoor()
 
 class DoorSprite(Sprite):
     def __init__(self, game, photo_image, x, y, width, height):
         Sprite.__init__(self, game)
+        self.closed_door = PhotoImage(file="door1.gif")
+        self.open_door = PhotoImage(file="door2.gif")
         self.photo_image = photo_image
         self.image = game.canvas.create_image(x, y, \
                 image = self.photo_image, anchor='nw')
         self.coordinates = Coords(x, y, x + (width / 2), y + height)
         self.endgame = True
+
+    def opendoor(self):
+        self.game.canvas.itemconfig(self.image, image=self.open_door)
+        self.game.tk.update_idletasks()
+
+    def closedoor(self):
+        self.game.canvas.itemconfig(self.image, \
+                image=self.closed_door)
+        self.game.tk.update_idletasks()
+
 
 g = Game()
 
